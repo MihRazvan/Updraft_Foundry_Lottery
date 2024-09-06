@@ -14,20 +14,36 @@ contract Raffle {
     error Raffle_SendMoreToEnterRaffle();
 
     uint256 private immutable i_entranceFee;
+    // @dev the duration of lottery in seconds
+    uint256 private immutable i_interval;
+    uint256 private s_lastTimeStamp;
+    address payable[] private s_players;
 
-    constructor(uint256 entranceFee) {
+    /** Events */
+    event RaffleEntered(address indexed player);
+
+    constructor(uint256 entranceFee, uint256 interval) {
         i_entranceFee = entranceFee;
+        i_interval = interval;
+        s_lastTimeStamp = block.timestamp;
     }
 
-    function enterRaffle() public payable {
+    function enterRaffle() external payable {
         // for 0.8.26+
         // require(msg.value >= i_entranceFee, SendMoreToEnterRaffle());
         if (msg.value <= i_entranceFee) {
             revert Raffle_SendMoreToEnterRaffle();
         }
+        s_players.push(payable(msg.sender));
+        emit RaffleEntered(msg.sender);
     }
 
-    function pickWinner() public {}
+    function pickWinner() external {
+        if ((block.timestamp - s_lastTimeStamp) < i_interval) {
+            revert();
+        }
+        // request and get chainlink VRF
+    }
 
     /** Getter functions */
 
