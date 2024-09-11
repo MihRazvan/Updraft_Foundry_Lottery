@@ -11,9 +11,18 @@ contract RaffleTest {
     HelperConfig public helperConfig;
 
     address public player = makeAddr("player");
+    uint256 public constant STARTING_PLAYER_BALANCE = 10 ether;
 
     function run() {
         DeployRaffle deployRaffle = new DeployRaffle();
         (raffle, HelperConfig) = deployRaffle.run();
+
+        vm.deal(player, STARTING_PLAYER_BALANCE);
+    }
+
+    function testRaffleRevertsWhenYouDontPayEnoughEth() {
+        vm.prank(player);
+        assertRevert();
+        raffle.enterRaffle{value: 0.1 ether}();
     }
 }
